@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .calculator-container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 24px;
+      width: 100%;
+      max-width: 420px;
+      margin: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .calculator-container {
+        border-radius: 16px;
+        padding: 16px;
+        margin: 8px;
+        max-width: 100%;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .calculator-container {
+        padding: 32px;
+        margin: 20px;
+      }
+    }
+
+    .calculator-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 480px) {
+      .calculator-title {
+        font-size: 28px;
+        margin-bottom: 24px;
+      }
+    }
+
+    .display {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    @media (min-width: 480px) {
+      .display {
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+    }
+
+    .display-expression {
+      font-size: 14px;
+      color: #718096;
+      margin-bottom: 6px;
+      min-height: 18px;
+      word-break: break-all;
+    }
+
+    @media (min-width: 480px) {
+      .display-expression {
+        font-size: 16px;
+        margin-bottom: 8px;
+        min-height: 20px;
+      }
+    }
+
+    .display-value {
+      font-size: 32px;
+      font-weight: 600;
+      color: #2d3748;
+      word-break: break-all;
+    }
+
+    @media (min-width: 480px) {
+      .display-value {
+        font-size: 40px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .display-value {
+        font-size: 48px;
+      }
+    }
+
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 480px) {
+      .buttons-grid {
+        gap: 12px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .buttons-grid {
+        gap: 16px;
+      }
+    }
+
+    .btn {
+      padding: 18px 12px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #f7fafc;
+      color: #2d3748;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (min-width: 480px) {
+      .btn {
+        padding: 24px;
+        font-size: 20px;
+        border-radius: 12px;
+        min-height: 64px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .btn {
+        padding: 28px;
+        font-size: 22px;
+        min-height: 72px;
+      }
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-number {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+
+    .btn-number:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-operator {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-operator:hover {
+      background: #5a67d8;
+    }
+
+    .btn-operator.active {
+      background: #4c51bf;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-equals {
+      background: #48bb78;
+      color: white;
+      grid-column: span 2;
+    }
+
+    .btn-equals:hover {
+      background: #38a169;
+    }
+
+    .btn-clear {
+      background: #fc8181;
+      color: white;
+    }
+
+    .btn-clear:hover {
+      background: #f56565;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+
+    .keyboard-hint {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 10px;
+      color: #718096;
+      padding: 0 8px;
+    }
+
+    @media (min-width: 480px) {
+      .keyboard-hint {
+        margin-top: 16px;
+        font-size: 12px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="calculator-container">
+   <h1 class="calculator-title" id="calculatorTitle">Calculator</h1>
+   <div class="display">
+    <div class="display-expression" id="expression"></div>
+    <div class="display-value" id="display">
+     0
+    </div>
+   </div>
+   <div class="buttons-grid"><button class="btn btn-clear" data-action="clear">C</button> <button class="btn btn-operator" data-action="operator" data-value="/">÷</button> <button class="btn btn-operator" data-action="operator" data-value="*">×</button> <button class="btn btn-operator" data-action="backspace">⌫</button> <button class="btn btn-number" data-action="number" data-value="7">7</button> <button class="btn btn-number" data-action="number" data-value="8">8</button> <button class="btn btn-number" data-action="number" data-value="9">9</button> <button class="btn btn-operator" data-action="operator" data-value="-">−</button> <button class="btn btn-number" data-action="number" data-value="4">4</button> <button class="btn btn-number" data-action="number" data-value="5">5</button> <button class="btn btn-number" data-action="number" data-value="6">6</button> <button class="btn btn-operator" data-action="operator" data-value="+">+</button> <button class="btn btn-number" data-action="number" data-value="1">1</button> <button class="btn btn-number" data-action="number" data-value="2">2</button> <button class="btn btn-number" data-action="number" data-value="3">3</button> <button class="btn btn-operator" data-action="operator" data-value=".">,</button> <button class="btn btn-number btn-zero" data-action="number" data-value="0">0</button> <button class="btn btn-equals" data-action="equals">=</button>
+   </div>
+   <div class="keyboard-hint">
+    Keyboard supported: Numbers, +, -, *, /, Enter, Backspace, C
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      calculator_title: "Calculator",
+      primary_color: "#667eea",
+      secondary_color: "#48bb78",
+      danger_color: "#fc8181",
+      text_color: "#2d3748",
+      background_gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    };
+
+    let currentValue = '0';
+    let previousValue = '';
+    let operator = null;
+    let shouldResetDisplay = false;
+
+    const displayElement = document.getElementById('display');
+    const expressionElement = document.getElementById('expression');
+
+    function updateDisplay() {
+      displayElement.textContent = currentValue;
+      if (previousValue && operator) {
+        expressionElement.textContent = `${previousValue} ${getOperatorSymbol(operator)}`;
+      } else {
+        expressionElement.textContent = '';
+      }
+    }
+
+    function getOperatorSymbol(op) {
+      const symbols = {
+        '+': '+',
+        '-': '−',
+        '*': '×',
+        '/': '÷'
+      };
+      return symbols[op] || op;
+    }
+
+    function handleNumber(num) {
+      if (shouldResetDisplay) {
+        currentValue = num;
+        shouldResetDisplay = false;
+      } else {
+        currentValue = currentValue === '0' ? num : currentValue + num;
+      }
+      updateDisplay();
+    }
+
+    function handleOperator(op) {
+      if (operator && !shouldResetDisplay) {
+        calculate();
+      }
+      
+      previousValue = currentValue;
+      operator = op;
+      shouldResetDisplay = true;
+      
+      document.querySelectorAll('.btn-operator').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const activeBtn = document.querySelector(`[data-value="${op}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+      
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!operator || !previousValue) return;
+
+      const prev = parseFloat(previousValue);
+      const current = parseFloat(currentValue);
+      let result;
+
+      switch (operator) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '*':
+          result = prev * current;
+          break;
+        case '/':
+          result = current !== 0 ? prev / current : 'Error';
+          break;
+        default:
+          return;
+      }
+
+      currentValue = result.toString();
+      operator = null;
+      previousValue = '';
+      shouldResetDisplay = true;
+      
+      document.querySelectorAll('.btn-operator').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      updateDisplay();
+    }
+
+    function clear() {
+      currentValue = '0';
+      previousValue = '';
+      operator = null;
+      shouldResetDisplay = false;
+      
+      document.querySelectorAll('.btn-operator').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (currentValue.length > 1) {
+        currentValue = currentValue.slice(0, -1);
+      } else {
+        currentValue = '0';
+      }
+      updateDisplay();
+    }
+
+    document.querySelectorAll('.btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        const value = button.dataset.value;
+
+        switch (action) {
+          case 'number':
+            handleNumber(value);
+            break;
+          case 'operator':
+            handleOperator(value);
+            break;
+          case 'equals':
+            calculate();
+            break;
+          case 'clear':
+            clear();
+            break;
+          case 'backspace':
+            backspace();
+            break;
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') {
+        handleNumber(e.key);
+      } else if (e.key === '.') {
+        if (!currentValue.includes('.')) {
+          handleNumber('.');
+        }
+      } else if (['+', '-', '*', '/'].includes(e.key)) {
+        handleOperator(e.key);
+      } else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        calculate();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        backspace();
+      } else if (e.key.toLowerCase() === 'c' || e.key === 'Escape') {
+        clear();
+      }
+    });
+
+    async function onConfigChange(config) {
+      const titleElement = document.getElementById('calculatorTitle');
+      titleElement.textContent = config.calculator_title || defaultConfig.calculator_title;
+      
+      document.body.style.background = config.background_gradient || defaultConfig.background_gradient;
+      
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+      const dangerColor = config.danger_color || defaultConfig.danger_color;
+      
+      document.querySelectorAll('.btn-operator').forEach(btn => {
+        btn.style.background = primaryColor;
+      });
+      
+      document.querySelector('.btn-equals').style.background = secondaryColor;
+      document.querySelector('.btn-clear').style.background = dangerColor;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_gradient || defaultConfig.background_gradient,
+              set: (value) => {
+                config.background_gradient = value;
+                window.elementSdk.setConfig({ background_gradient: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.danger_color || defaultConfig.danger_color,
+              set: (value) => {
+                config.danger_color = value;
+                window.elementSdk.setConfig({ danger_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["calculator_title", config.calculator_title || defaultConfig.calculator_title]
+        ])
+      });
+    }
+
+    updateDisplay();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a18f6b8f17703fd',t:'MTc2MzY1MjM2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
